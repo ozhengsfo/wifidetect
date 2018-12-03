@@ -41,12 +41,19 @@ public class wifiDetectService extends Service {
     private static final int  WIFI_THRESHODE = 3000;// wifi ping 测试时间阈值，大于500表示wifi模块功能异常,连续5次。要重启wifi
     private static int PingFailTimes = 0; // wifi ping 失败次数 连续3次Ping 失败，则重启wifi
     private static boolean PingStatus = false; // ping 执行结果，false 表示ping 失败
+    private static boolean LinkSatus = false; //连接状态，在LinkStatus = true 时累加连接时间。
+    private static int HttpFailTimes = 0;//http get 失败次数
 
     //private static int httpGetFailTimes
     private static int httpGetFailTimes = 0;
     private static int WifiRestartTimes = 0;
     private static long ServiceStartTime = 0; //本次连接wifi 启动时间
+    private static long ConnectSucStartTime = 0;//连接成功时的开始时间
     private static long NetLastTime = 0; // wifi持续时间
+    private static long OnceLastTime = 0;//wifi 一次长连接时长
+    private static long NetLastTimeBefore = 0; //
+    private static long ServiceLastTime = 0; //本次检测Service启动时长
+    private static long NetFailTims = 0; //wifi 未连接时长
     private final int MSG_SET_AUTO_RECONNECT = 1;
     private final int MSG_ENABLE_AUTO_RECONNECT = 1;
     private final int MSG_DISABLE_AUTO_RECONNECT = 0;
@@ -55,7 +62,7 @@ public class wifiDetectService extends Service {
     static final int WIFI = 1;
     static final  int LTE = 2;
     private boolean mAutoReconect = false; //默认关闭
-    private static int HttpFailTimes = 0;
+    //private static int HttpFailTimes = 0;
     public wifiDetectService(){
         messengerHandler = new MessengerHandler();
     }
@@ -93,7 +100,9 @@ public class wifiDetectService extends Service {
     public class wifiStatus{
         String powerOnTime;
         String wifiLastTime;
-        String pingResult;
+        String ServiceRunTime;
+        boolean CommunicateStatus;
+        int HttpFailTimes;
     }
     public boolean isWifiConnected(Context context) {
         if (context != null) {
@@ -148,23 +157,29 @@ public class wifiDetectService extends Service {
                     if( isNetSystemUsable(mContext)){
                         Log.d(TAG,"NetSystemUsable is true");
                     }else {
+
                         Log.d(TAG,"NetSystemUsable is false");
                     }
                     try {
                         if(WifiChanged == false) {
                             isAvailableByHttpGet();
                           //  isAvailableByPing("www.baidu.com");
-                            long runTime = SystemClock.elapsedRealtime();
-                            String powerOnTime = millsecondToString(runTime);
                             String wifiLastTime = millsecondToString(NetLastTime);
-                            mWifiStatus.powerOnTime = powerOnTime;
                             mWifiStatus.wifiLastTime = wifiLastTime;
+
                         }else {
                             setWifiStatus(ENABLE);
                             WifiRestartTimes ++;
                             WifiChanged = false;
                             Thread.sleep(30000);
                         }
+                        long runTime = SystemClock.elapsedRealtime();
+                        String powerOnTime = millsecondToString(runTime);
+                        mWifiStatus.powerOnTime = powerOnTime;
+                        mWifiStatus.HttpFailTimes = HttpFailTimes;
+                        long RunTime = System.currentTimeMillis() - ServiceStartTime;
+                        String serviceRunTime = millsecondToString(RunTime);
+                        mWifiStatus.ServiceRunTime = serviceRunTime;
                         //Thread.sleep(1000);
                         Thread.sleep(20000);
                     } catch (InterruptedException e) {
@@ -207,6 +222,7 @@ public class wifiDetectService extends Service {
         Log.d(TAG,"wifi detect service  start");
         mContext = this;
         HttpFailTimes = 0;
+        NetLastTimeBefore = 0;
         int model = intent.getIntExtra("model",1);
         if(model == WIFI){
             ServiceStartTime = System.currentTimeMillis();
@@ -264,12 +280,21 @@ public class wifiDetectService extends Service {
         Call call = sClient.newCall(request);
         try {
             Response response = call.execute();
+            if(LinkSatus == false){
+                ConnectSucStartTime = System.currentTimeMillis();
+                LinkSatus = true;
+            }
+            OnceLastTime = System.currentTimeMillis() - ConnectSucStartTime;
             Log.d(TAG,response.toString());
             Log.d(TAG,"http get wx success");
             return true;
             //storageToken = response.body().string();
         } catch (IOException e) {
             Log.e(TAG,"httpGetWx exception");
+            NetLastTimeBefore += OnceLastTime;
+            OnceLastTime = 0;
+            LinkSatus = false;
+            HttpFailTimes ++;
             return false;
         }finally {
             //call
@@ -285,9 +310,11 @@ public class wifiDetectService extends Service {
     public  boolean isAvailableByHttpGet() {
         if(httpGetWx() ==true){
             httpGetFailTimes = 0;
-            NetLastTime = System.currentTimeMillis()  - ServiceStartTime;
+            NetLastTime =  NetLastTimeBefore + OnceLastTime;
+            mWifiStatus.CommunicateStatus = true;
         }else{
             httpGetFailTimes ++;
+            mWifiStatus.CommunicateStatus = false;
             if(httpGetFailTimes >3){
                 if(mAutoReconect == true) {
                     WifiChanged = true;

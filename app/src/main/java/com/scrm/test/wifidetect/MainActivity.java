@@ -5,7 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public Button StartWifiTest;
     public Button btnStartLteTest;
     private Button btnAutoReConnect;
+    private TextView tvCommunicateStatus;
     public static Context mContext;
     public static boolean wifiRunning = false;
     public static boolean lteRunning = false;
@@ -48,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public TextView mReConnectTimes;
     public TextView PowerOnTime;
+    public TextView mRunningTimes;
+    public TextView mHttpFailTimes;
     Intent intent;
     private boolean isMessengerServiceConnected = false;
     @Override
@@ -58,6 +63,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mEditContectTime = (TextView) findViewById(R.id.ewifi_connect_time);
         mReConnectTimes  = (TextView) findViewById(R.id.reconnect_times);
         PowerOnTime = (TextView) findViewById(R.id.poweron_times);
+        tvCommunicateStatus = (TextView) findViewById(R.id.CommunicateStatus);
+        mRunningTimes = (TextView) findViewById(R.id.running_times);
+        mHttpFailTimes  = (TextView) findViewById(R.id.http_fail_times);
         StartWifiTest = findViewById(R.id.StartTest);
         btnStartLteTest = findViewById(R.id.btnLteTest);
         btnAutoReConnect = findViewById(R.id.AutoReConnect);
@@ -91,6 +99,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     mReConnectTimes.setText(Integer.toString(mCount));
                     PowerOnTime.setText(mWifiStatus.powerOnTime);
                     mEditContectTime.setText(mWifiStatus.wifiLastTime);
+                    mRunningTimes.setText(mWifiStatus.ServiceRunTime);
+                    mHttpFailTimes.setText(String.valueOf(mWifiStatus.HttpFailTimes));
+                    if(mWifiStatus.CommunicateStatus == true){
+                        tvCommunicateStatus.setText("已连接");
+                        tvCommunicateStatus.setTextColor(getResources().getColor(R.color.main_blue));
+                        GradientDrawable drawable = new GradientDrawable();
+                        drawable.setCornerRadius(3);
+                        drawable.setStroke(1, Color.parseColor("#505050"));
+                        drawable.setColor(getResources().getColor(R.color.txt_green));
+                        tvCommunicateStatus.setBackground(drawable);
+                        //tvCommunicateStatus.stroke
+                    }else {
+                        tvCommunicateStatus.setText("连接失败");
+                        tvCommunicateStatus.setTextColor(getResources().getColor(R.color.txt_red));
+                        tvCommunicateStatus.setBackground(getResources().getDrawable(R.drawable.edit_bg));
+                    }
                 }else if(lteRunning ==true){
                     mReConnectTimes.setText(Integer.toString(mCount));
                     PowerOnTime.setText(mLteStatus.powerOnTime);
