@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <!--Root-->
+    <color name="product_list_bac">#efeef4</color>
+    <color name="keyboard_blackground">#bababa</color>
+    <color name="black">#000</color>
+    <color name="color_3c3c3c">#efeef4</color>
+    <color name="color_999999">#999999</color>
+    <color name="color_1a98ff">#1a98ff</color>
+    <color name="color_d8dbdf">#334455</color>
+
+    <color name="app_style">#03233b</color>
+    <color name="txt_orange">#ff6800</color>
+    <color name="txt_red">#ff3000</color>
+
+    <!--通用-->
+    <color name="white_light">#ffffff</color>
+    <color name="login_edit_hint">#fbc287</color>
+    <color name="login_edit_input">#fd8e21</color>
+    <color name="dialog_white">#fdfdfd</color>
+    <color name="alertdialog_line">#c6c6c6</color>
+    <color name="alerDialogMsg">#343434</color>
+    <color name="update_view">#ededed</color>
+    <color name="normal_content">#474747</color>
+    <color name="normal_blue">#5a7afc</color>
+    <color name="main_tv_title">#333333</color>
+    <color name="main_tv_background">#bf0d23</color>
+
+    <!--new-->
+    <color name="main_blue">#FF21AEFF</color>
+
+    <color name="text_white">#FFFFFFFF</color>
+    <color name="text_black">#000000</color>
+    <color name="text_gray_79">#FF797979</color>
+    <color name="text_gray_66">#FF666666</color>
+    <color name="text_blue_21">#FF21AEFF</color>
+    <color name="text_gray_1e">#FF1E1E1E</color>
+    <color name="text_red_af">#ffaf1e1f</color>
+
+    <color name="bg_light_orange">#FFF8F4EF</color>
+    <color name="bg_gray_f6">#FFF6FAFC</color>
+    <color name="text_black_1e">#FF1E1E1E</color>
+    <color name="text_gray_99">#FF999999</color>
+
+</resources>
