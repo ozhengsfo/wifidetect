@@ -1,12 +1,18 @@
 package com.scrm.test.wifidetect;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -14,7 +20,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
-import android.widget.EditText;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -204,11 +209,34 @@ public class wifiDetectService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        startNotification();
+    }
+    public void startNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("fore_service", "前台服务", NotificationManager.IMPORTANCE_LOW);
+            NotificationManager notificationManager = (NotificationManager)
+                    getSystemService(NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+            Intent intentForeSerive = new Intent(this, wifiDetectService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(this, 0,
+                    intentForeSerive, 0);
+            Notification notification = new Notification.Builder(this)
+                    .setContentTitle(getString(R.string.app_name))
+                    .setWhen(System.currentTimeMillis())
+                    .setChannelId("fore_service")
+                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                    .setContentIntent(pendingIntent)
+                    .build();
+            startForeground(1, notification);
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mContext = this;
+        Log.d(TAG,"Service Start");
         return super.onStartCommand(intent, flags, startId);
     }
 

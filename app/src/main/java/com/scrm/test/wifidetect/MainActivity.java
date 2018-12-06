@@ -1,10 +1,13 @@
 package com.scrm.test.wifidetect;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
@@ -16,9 +19,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -78,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String name = "test";
 
     }
+
     /**
      * 刷新数字
      */
@@ -130,11 +136,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             isMessengerServiceConnected = false;
         }
     }
+
     static final int WIFI = 1;
     static final  int LTE = 2;
     private void startMessengerMethod(int tag) {
         if(tag == WIFI) {
             intent = new Intent(this, wifiDetectService.class);
+            startService(intent);
             intent.putExtra("model", tag);
             bindService(intent, messengerServiceConnection, Service.BIND_AUTO_CREATE);
         }else if (tag == LTE){
@@ -238,7 +246,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
     }
-
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            startActivity(home);
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
     //messenger使用
     private ServiceConnection messengerServiceConnection = new ServiceConnection() {
         @Override
